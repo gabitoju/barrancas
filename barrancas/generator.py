@@ -1,9 +1,13 @@
 from path import path
 from string import Template
+from jinja2 import Environment, FileSystemLoader
 import markdown
 import yaml
 import re
-from jinja2 import Environment, FileSystemLoader
+import sys, traceback
+
+
+TEMPLATE_NOT_FOUND_ERROR = 'Template file {0} could not be found'
 
 class Generator():
 
@@ -12,7 +16,12 @@ class Generator():
 
     def generate(self):
         
-        general_template = Template(path('templates/general.html').text(encoding='UTF-8'))
+        try:
+            general_template = Template(path('templates/general.html').text(encoding='UTF-8'))
+        except Exception as e:
+            sys.stderr.write(TEMPLATE_NOT_FOUND_ERROR.format('templates/general.html'))
+            sys.exit(1)
+
         current_dir = path('.')
         menu_items = []
         content_list = []
@@ -27,8 +36,13 @@ class Generator():
             html_content = markdown.markdown(content, output_format='html5')			
             
             if 'template' in properties:
-                template_f = Template(path('templates/{0}.html'.format(properties['template'])).text(encoding='UTF-8'))
-                html_content = template_f.safe_substitute(properties, content=html_content)    
+                template_path = 'templates/{0}.html'.format(properties['template'])
+                try:                    
+                    template_f = Template(path(template_path).text(encoding='UTF-8'))
+                    html_content = template_f.safe_substitute(properties, content=html_content)    
+                except Exception as e:
+                    sys.stderr.write(TEMPLATE_NOT_FOUND_ERROR.format(template_path))
+                    sys.exit(1)                    
             if 'order' in properties:
                 menu_items.append({'order': int(properties['order'] - 1),'title': properties['title'], 'link': f.replace('.md', '.html')})
             else:
