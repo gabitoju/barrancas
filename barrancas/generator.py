@@ -33,7 +33,7 @@ class Generator():
             properties = yaml.load(parts.group(1))
             properties.update(self.properties)
             content = content.replace(parts.group(0), '')
-            html_content = markdown.markdown(content, output_format='html5')			
+            html_content = markdown.markdown(content, output_format='html5', extensions=['markdown.extensions.extra'])			
             
             if 'template' in properties:
                 template_path = 'templates/{0}.html'.format(properties['template'])
