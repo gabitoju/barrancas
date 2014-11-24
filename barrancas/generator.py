@@ -25,6 +25,7 @@ class Generator():
         current_dir = path('.')
         menu_items = []
         content_list = []
+        links = {}
         for f in current_dir.files('*.md'):
             print 'Generating: {0}'.format(f)
             content = f.text(encoding='UTF-8')            
@@ -45,13 +46,15 @@ class Generator():
                     sys.exit(1)                    
             if 'order' in properties:
                 menu_items.append({'order': int(properties['order'] - 1),'title': properties['title'], 'link': f.replace('.md', '.html')})
+                order = int(properties['order'])
             else:
                 menu_items.append({'order': 0,'title': properties['title'], 'link': f.replace('.md', '.html')})
-
+                order = 0
             final_content = general_template.safe_substitute(properties, content=html_content)
 
             file_name = f.replace('.md', '.html')
-            content_list.append((file_name, final_content))
+            links[order] = (file_name.replace('./', ''), properties['title'], properties.get('lang', ''))
+            content_list.append((file_name, final_content, order, properties.get('lang', '')))
         menu_items = sorted(menu_items, key = lambda k: k['order'])
         
         for c in content_list:
@@ -73,5 +76,30 @@ class Generator():
             else:
                 content = content.replace('${quick_menu}', '')
             
+            order = c[2]
+            if order != 0:
+                link_p = u'<a class="previous" href="{0}">{1} >></a>'
+                try:
+                    previous = links[order - 1][0]                  
+                    name = links[order - 1][1]            
+                    if c[3] == links[order - 1][2]:
+                        link_p = link_p.format(previous, name)                    
+                    else:
+                        link_p = ''
+                except Exception as e:                
+                    link_p = ''
+
+                link_n = u'<a class="next" href="{0}"><< {1}</a>'
+                try:
+                    next_p = links[order + 1][0]                  
+                    name = links[order + 1][1]
+                    if c[3] == links[order + 1][2]:
+                        link_n = link_n.format(next_p, name)                    
+                    else:
+                        link_n = ''
+                except Exception as e:                                           
+                    link_n = ''
+                content = content.replace('${previous}', link_p).replace('${next}', link_n)
+
             path(c[0]).write_text(content, encoding='UTF-8')
    
