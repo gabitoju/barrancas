@@ -112,7 +112,7 @@ class Generator:
 
             order = c[2]
             if order != 0:
-                link_p = '<a class="previous" href="{0}">{1} >></a>'
+                link_p = '<a class="previous" href="{0}">{1} &gt;&gt;</a>'
                 try:
                     previous = links[order - 1][0]
                     name = links[order - 1][1]
@@ -123,7 +123,7 @@ class Generator:
                 except Exception:
                     link_p = ""
 
-                link_n = '<a class="next" href="{0}"><< {1}</a>'
+                link_n = '<a class="next" href="{0}">&lt;&lt; {1}</a>'
                 try:
                     next_p = links[order + 1][0]
                     name = links[order + 1][1]
