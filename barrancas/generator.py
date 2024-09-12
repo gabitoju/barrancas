@@ -15,6 +15,7 @@ class Generator:
 
     def __init__(self, properties):
         self.properties = properties
+        self.env = Environment(loader=FileSystemLoader("templates"))
 
     def generate(self):
 
@@ -89,9 +90,8 @@ class Generator:
             )
         menu_items = sorted(menu_items, key=lambda k: k["order"])
 
+        temp = self.env.get_template("menu.html")
         for c in content_list:
-            env = Environment(loader=FileSystemLoader("templates"))
-            temp = env.get_template("menu.html")
             menu = temp.render(items=menu_items, current=c[0])
 
             content = c[1].replace("${menu}", menu)
@@ -104,7 +104,7 @@ class Generator:
                 content = content.replace("<h3>" + item + "</h3>", link)
                 i = i + 1
             if len(quick_menu_items) > 0:
-                temp = env.get_template("quick_menu.html")
+                temp = self.env.get_template("quick_menu.html")
                 quick_menu = temp.render(items=quick_menu_items, current=c[0])
                 content = content.replace("${quick_menu}", quick_menu)
             else:
